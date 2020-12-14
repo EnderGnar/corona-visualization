@@ -73,13 +73,24 @@ const colors = [
     "lightblue",
 ]
 
+const styles = [
+    "Balken",
+    "Punkte",
+    "Linie",
+]
+
+
 class DrawCall extends Call{
     theme;
     currAttr;
+    currModifier;
 
     color= "blue";
+    style = styles[0];
 
     filter=[];
+
+    modifier = [];
 
     constructor(id){
         super(id);
@@ -105,6 +116,13 @@ class DrawCall extends Call{
         div.appendChild(
             $('<div><span>Color: </span></div>')
             .append(this.colorSelector())[0]
+        )
+
+        //Style Select
+        //Color Select
+        div.appendChild(
+            $('<div><span>Style: </span></div>')
+            .append(this.styleSelector())[0]
         )
 
         if(this.theme != undefined){
@@ -139,6 +157,12 @@ class DrawCall extends Call{
 
             div.appendChild(attributes[0]);
         }
+
+        //Modifier
+        div.appendChild(
+            this.renderModifier()
+        );
+
 
         this.dom.replaceChildren(div);
     }
@@ -175,6 +199,23 @@ class DrawCall extends Call{
             </select>`)
             .change(function(e) {
                 call.color = this.value;
+            })[0];
+    }
+
+    styleSelector = function(){
+        //Selector for theme standard value = "none"
+        //on change rerenders DOM with given information.
+
+        let call = this;
+
+        return $(`<select name="theme" value="death">
+                ${(this.style == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
+                ${
+                    styles.map(e => `<option value="${e}" ${(this.style == e)?"selected":""}>${e}</option>`).join(' ')
+                }
+            </select>`)
+            .change(function(e) {
+                call.style = this.value;
             })[0];
     }
 
@@ -216,6 +257,52 @@ class DrawCall extends Call{
         return div.append(selection);
     }
 
+    renderModifier = function(){
+        let div = $('<div><span>Modifier: </span></div>');
+        let call = this;
+
+        let select = $(`<select name="theme" value="death">
+            ${(this.currModifier == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
+            ${
+                modifiers.map(e => `<option value="${e.name}" ${(this.currModifier == e.name)?"selected":""}>${e.name}</option>`).join(' ')
+            }
+        </select>`)
+        .change(function(e) {
+            call.currModifier = this.value;
+        });
+
+
+        let addbutton = $('<button>add</button>')
+        .click((e) => {
+            if(this.currModifier==undefined) return;
+            this.addModifier();
+            this.rerender();
+        });
+
+        div.append(select);
+        div.append(addbutton);
+
+        let holder = $('<div></div>');
+        for(let mod of this.modifier){
+            let parent = modifiers.find(e => e.name == mod.name);
+            let modDom = $(`<div><span>${mod.name}: </span></div>`)
+            let modSelect = $(`<select name="modifier">
+                ${(!parent.options.find(e => e == mod.option))? '<option value="" selected disabled hidden>not selected</option>':''}
+                ${
+                    parent.options.map(e => `<option value="${e}" ${(mod.option == e)?"selected":""}>${e}</option>`).join(' ')
+                }
+            </select>`)
+            .change(function(e) {mod.option = this.value; call.rerender()})[0];
+
+            modDom.append(modSelect);
+            holder.append(modDom);
+        }
+
+        div.append(holder);
+
+        return div[0];
+    }
+
     addFilter = async function(){
         let attr = await data.getAttributes(this.theme);
 
@@ -226,6 +313,17 @@ class DrawCall extends Call{
         })
     }
 
+    addModifier = function(){
+        if(modifiers.find(e => e.name == this.currModifier) == undefined) return;
+
+        let mod = {
+            name: this.currModifier,
+            option: undefined,
+        }
+
+        this.modifier.push(mod);
+    }
+
     rerender = function(){
         this.renderDom();
     }
@@ -233,9 +331,32 @@ class DrawCall extends Call{
     getBars = async function(){
         let array = await data.get(this.theme);
 
+        //Filter
         for(let filter of this.filter){
             array = array.filter(e => e[filter.attribute] == filter.value);
         }
+
+        //Modify
+
+        for(let mod of this.modifier){
+            if(mod.option == undefined) continue;
+
+            switch(mod.name){
+                case "running-average":
+                    array = runningAverage(array, mod.option);
+                    break;
+                case "multiplier":
+                    array = multiplier(array, mod.option);
+                    break;
+                case "benford":
+                    array = benford(array);
+                    break;
+                case "sum-up":
+                    array = sumUp(array, mod.option);
+                    break;
+            }
+        }
+
         return array;
     }
 }
@@ -289,6 +410,7 @@ class ScaleCall extends Call{
 
         for(let {entries} of arr) if(entries > max) max = entries;
 
+        console.log(max);
         return max;
     }
 }

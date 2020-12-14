@@ -7,9 +7,6 @@ const height = 400;
 async function draw(id){
     ctx.clearRect(0,0,width,height);
 
-    let condition = ({geoRegion}) => geoRegion == "CHFL";
-    drawer.scale((await data.get("casesAKL")).filter(condition));
-
     for(let call of calls){
         if(call instanceof DrawCall){
             if(call.theme == undefined) continue;
@@ -17,7 +14,9 @@ async function draw(id){
             let array = await call.getBars();
 
             ctx.fillStyle = call.color;
-            drawer.draw(array);
+            ctx.strokeStyle = call.color;
+
+            drawer.draw(array, call.style);
         }
 
         else if(call instanceof ScaleCall){
@@ -55,19 +54,64 @@ const drawer = {
 
     scaling:1,
 
-    draw: async function(bars){
-        const space = width / bars.length;
+    draw: async function(bars, style){
+        const space = (width* 0.9) / bars.length;
     
-        for(let i = 0; i < bars.length; i++){
-            const bar = bars[i];
-        
-            ctx.beginPath();
-            ctx.rect(i*space, height, space, -this.scaling*bar.entries);
-            ctx.fill();
+        if(style == "Balken"){
+            for(let i = 0; i < bars.length; i++){
+                const bar = bars[i];
+                
+                ctx.beginPath();
+                ctx.rect(0.1*width + i*space, height, space, -this.scaling*bar.entries);
+                ctx.fill();
+            }
         }
+        else if(style == "Punkte"){
+            for(let i = 0; i < bars.length; i++){
+                const bar = bars[i];
+                
+                ctx.beginPath();
+                ctx.arc(0.1*width + (i+0.5)*space, height - this.scaling*bar.entries, Math.max(space*0.2,4), 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+        else if(style == "Linie"){
+            ctx.beginPath();
+
+
+
+            for(let i = 1; i < bars.length; i++){
+                const bar = bars[i];
+                
+                ctx.lineTo(0.1*width + (i+0.5)*space, height - this.scaling*bar.entries);
+            }
+
+            ctx.stroke();
+        }
+
     },
 
     scale: function(max){
         this.scaling = (height*0.9) / max;
+
+        let h = height/this.scaling;
+
+        let size = Math.round(Math.log10(h));
+
+        let powerDist = Math.pow(10, size-1) * this.scaling;
+
+        ctx.strokeStyle = "#00000060";
+        ctx.fillStyle = "#000000";
+
+        for(let i = 0; powerDist*i <= height; i++){
+            let y = height - powerDist * i;
+
+            ctx.beginPath();
+            ctx.moveTo(0,y);
+            ctx.lineTo(width,y);
+            ctx.stroke();
+
+            ctx.fillText(Math.pow(10, size-1)*i, 5, y-2);
+        }
     },
 }

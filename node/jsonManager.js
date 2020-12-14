@@ -2,23 +2,23 @@ const fs = require("fs");
 const path = require("path");
 
 const map = {
-    COVID19Death_geoRegion:"death",
-    COVID19Death_geoRegion_sex_w:"deathSEX",
-    COVID19Death_geoRegion_AKL10_w:"deathAKL",
+    "death":"COVID19Death_geoRegion",
+    "deathSEX":"COVID19Death_geoRegion_sex_w",
+    "deathAKL":"COVID19Death_geoRegion_AKL10_w",
 
-    COVID19Cases_geoRegion:"cases",
-    COVID19Cases_geoRegion_sex_w:"casesSEX",
-    COVID19Cases_geoRegion_AKL10_w:"casesAKL",
+    "cases":"COVID19Cases_geoRegion",
+    "casesSEX":"COVID19Cases_geoRegion_sex_w",
+    "casesAKL":"COVID19Cases_geoRegion_AKL10_w",
 
-    COVID19Hosp_geoRegion:"hosp",
-    COVID19Hosp_geoRegion_sex_w:"hospSEX",
-    COVID19Hosp_geoRegion_AKL10_w:"hospAKL",
+    "hosp":"COVID19Hosp_geoRegion",
+    "hospSEX":"COVID19Hosp_geoRegion_sex_w",
+    "hospAKL":"COVID19Hosp_geoRegion_AKL10_w",
 
-    COVID19Test_geoRegion_all:"test",
-    COVID19Test_geoRegion_AKL10_w:"testAKL",
-    COVID19Test_geoRegion_sex_w:"testSEX",
+    "test":"COVID19Test_geoRegion_all",
+    "testAKL":"COVID19Test_geoRegion_AKL10_w",
+    "testSEX":"COVID19Test_geoRegion_sex_w",
 	
-	COVID19Test_geoRegion_PCR_Antigen:"pcr-antigen",
+	"pcr-antigen":"COVID19Test_geoRegion_PCR_Antigen",
 }
 
 exports.load = function(dirname, id){
