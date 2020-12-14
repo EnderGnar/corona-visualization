@@ -59,6 +59,8 @@ const themes = [
     "hosp",
     "hospAKL",
     "hospSEX",
+	
+	"pcr-antigen",
 ];
 
 const colors = [

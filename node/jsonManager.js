@@ -2,21 +2,23 @@ const fs = require("fs");
 const path = require("path");
 
 const map = {
-    death:"death",
-    deathSEX:"deathSEX",
-    deathAKL:"deathAKL",
+    COVID19Death_geoRegion:"death",
+    COVID19Death_geoRegion_sex_w:"deathSEX",
+    COVID19Death_geoRegion_AKL10_w:"deathAKL",
 
-    cases:"cases",
-    casesSEX:"casesSEX",
-    casesAKL:"casesAKL",
+    COVID19Cases_geoRegion:"cases",
+    COVID19Cases_geoRegion_sex_w:"casesSEX",
+    COVID19Cases_geoRegion_AKL10_w:"casesAKL",
 
-    hosp:"hosp",
-    hospSEX:"hospSEX",
-    hospAKL:"hospAKL",
+    COVID19Hosp_geoRegion:"hosp",
+    COVID19Hosp_geoRegion_sex_w:"hospSEX",
+    COVID19Hosp_geoRegion_AKL10_w:"hospAKL",
 
-    test:"test",
-    testAKL:"testAKL",
-    testSEX:"testSEX",
+    COVID19Test_geoRegion_all:"test",
+    COVID19Test_geoRegion_AKL10_w:"testAKL",
+    COVID19Test_geoRegion_sex_w:"testSEX",
+	
+	COVID19Test_geoRegion_PCR_Antigen:"pcr-antigen",
 }
 
 exports.load = function(dirname, id){
