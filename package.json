@@ -1,0 +1,15 @@
+{
+  "name": "corona",
+  "version": "1.0.0",
+  "description": "visualisation for corona stats",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andi Dobler & Yannik Wyss",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "fs": "0.0.1-security"
+  }
+}
