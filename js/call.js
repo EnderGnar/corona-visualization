@@ -105,7 +105,20 @@ class DrawCall extends Call{
         div.appendChild(
             $(`<b>draw call ${this.id}</b>`)[0]
         );
-
+		
+		//delete
+		let delbutton = $('<button>delete this drawcall</button>')
+        .click((e) => {
+			let pos = calls.indexOf(this);
+            calls.splice(pos,1);
+			$("#"+this.id).remove();
+        });
+		
+		div.appendChild(
+		$('<div></div>')
+		.append(delbutton)[0]);
+		
+		
         //Theme
         div.appendChild(
             $('<div><span>Theme: </span></div>')
@@ -379,10 +392,23 @@ class ScaleCall extends Call{
         div.appendChild(
             $('<b>scale call</b>')[0]
         );
+		
+		//delete
+		let delbutton = $('<button>delete this scalecall</button>')
+        .click((e) => {
+			let pos = calls.indexOf(this);
+            calls.splice(pos,1);
+			$("#"+this.id).remove();
+        });
+
 
         div.appendChild(
             this.dependencySelector()
         );
+		
+		div.appendChild(
+		$('<div></div>')
+		.append(delbutton)[0]);
 
         this.dom.replaceChildren(div);
     }
