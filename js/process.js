@@ -65,7 +65,7 @@ class ProcessCall extends Call{
         );
 
         //delete
-		let delbutton = $('<button>delete this drawcall</button>')
+		let delbutton = $('<button>delete this process call</button>')
         .click((e) => {
 			let pos = calls.indexOf(this);
             calls.splice(pos,1);
@@ -281,5 +281,105 @@ class ProcessCall extends Call{
 
     toString = function(){
         return JSON.stringify(this);
+    }
+
+    loadDependency = function(){};
+}
+
+
+class AddCall extends ProcessCall{
+    dependencies = [];
+
+    constructor(id){
+        super(id);
+
+        this.type = "add";
+
+        this.renderDom();
+    }
+
+    renderDom = function(){
+        let div = document.createElement('div');
+
+        //Header
+        div.appendChild(
+            $(`<b>data adder ${this.id}</b>`)[0]
+        );
+
+        //delete
+		let delbutton = $('<button>delete this add call</button>')
+        .click((e) => {
+			let pos = calls.indexOf(this);
+            calls.splice(pos,1);
+
+            calls.forEach(call => {
+                if(call instanceof ScaleCall || call instanceof DrawCall){
+                    if(call.dependency == this) {
+                        call.dependency = null;
+                        call.rerender();
+                    }
+                }
+                else if(call instanceof DrawCall){
+
+                }
+            })
+            $("#"+this.id).remove();
+        });
+
+        for(let d of this.dependencies){
+            div.appendChild($(`<div>adds: ${d.id}</div>`)[0]);
+        }
+
+        div.appendChild(this.dependencySelector());
+
+        this.dom.replaceChildren(div);
+    }
+
+    dependencySelector = function(){
+        let call = this;
+
+        return $(`<select name="theme">
+                '<option value="" selected hidden>add new</option>
+                ${
+                    calls.filter(e => (e instanceof ProcessCall && e != this))
+                    .map(e => `<option value="${e.id}">${e.id}</option>`).join(' ')
+                }
+            </select>`)
+            .change(function(e) {
+                if(this.value == "") return;
+                call.dependencies.push(calls.find(x => x.id == Number(this.value)));
+                call.rerender();
+            })[0];
+    }
+
+    getBars = async function(){
+        if(this.dependencies.length == 0) throw "WTF BRO";
+
+        let out = (await this.dependencies[0].getBars()).map(e => clone(e));
+
+        for(let i = 1; i < this.dependencies.length; i++){
+            let arr = await this.dependencies[i].getBars();
+
+            for(let j = 0; j < arr.length; j++) out[j].entries += arr[j].entries;
+        }
+
+        return out;
+    }
+
+    toString = function(){
+        return JSON.stringify({
+            id:this.id,
+            type:this.type,
+            dependencies: this.dependencies.map(e => e.id),
+        });
+    }
+
+
+    loadDependency = function (){
+        for(let dep of this.dependencies){
+            if(typeof dep == 'number'){
+                dep = calls.find(e => e.id == dep);
+            }
+        }
     }
 }

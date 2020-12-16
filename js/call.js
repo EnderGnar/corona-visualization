@@ -13,6 +13,7 @@ async function generateCall(type){
     if(type == "draw") call = new DrawCall(generateId());
     else if(type == "scale") call = new ScaleCall(generateId());
     else if(type == "process") call = new ProcessCall(generateId());
+    else if(type == "add") call = new AddCall(generateId());
 
     calls.push(call);
 
@@ -184,7 +185,19 @@ class DrawCall extends Call{
     }
 
     toString = function(){
-        return JSON.stringify(this);
+        return JSON.stringify({
+            id: this.id,
+            type: this.type,
+            color: this.color,
+            style: this.style,
+            dependency: (this.dependency)?this.dependency.id:undefined,
+        });
+    }
+
+    loadDependency = function (){
+        if(typeof this.dependency == 'number'){
+            this.dependency = calls.find(e => e.id == this.dependency);
+        }
     }
 }
 
@@ -256,6 +269,16 @@ class ScaleCall extends Call{
     }
 
     toString = function(){
-        return JSON.stringify(this);
+        return JSON.stringify({
+            id:this.id,
+            type:this.type,
+            dependency: (this.dependency)?this.dependency.id:undefined,
+        });
+    }
+
+    loadDependency = function (){
+        if(typeof this.dependency == 'number'){
+            this.dependency = calls.find(e => e.id == this.dependency);
+        }
     }
 }

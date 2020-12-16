@@ -1,3 +1,11 @@
+window.onload = function(){
+    let search = window.location.search;
+    if(search == "") return;
+
+    callsFromJSON(decodeURI(search.substr(1)));
+};
+
+
 $('#drawByCalls').click(
     function(e){
         draw();
@@ -22,6 +30,12 @@ $('#addProcess').click(
     }
 )
 
+$('#addADD').click(
+    function(e){
+        generateCall("add");
+    }
+)
+
 $('#import').click(
     function(e){
         $('#jsoninput').css('visibility','visible');
@@ -31,7 +45,11 @@ $('#import').click(
 
 $('#export').click(
     function(e){
-        $('#json').val(callsToJSON());
+        let json = callsToJSON();
+
+        window.history.pushState({}, 'Corona vis', window.location.origin + "/?" + encodeURI(json));
+
+        $('#json').val(json);
         $('#jsoninput').css('visibility','visible');
     }
 )
@@ -65,6 +83,8 @@ function callsFromJSON(string){
     holder.innerHTML = "";
 
     for(let call of calls) {
+        call.loadDependency();
+
         holder.appendChild(call.dom);
         call.renderDom();
     }
@@ -99,6 +119,12 @@ function callFrom(obj){
             call.filter = obj.filter;
             call.modifier = obj.modifier;
 
+            return call;
+
+        case "add":
+            call = new AddCall(obj.id);
+
+            call.dependencies = obj.dependencies;
             return call;
     }
 }
