@@ -4,13 +4,11 @@ const width = 800;
 const height = 400;
 
 
-async function draw(id){
+async function draw(){
     ctx.clearRect(0,0,width,height);
 
     for(let call of calls){
         if(call instanceof DrawCall){
-            if(call.theme == undefined) continue;
-
             let array = await call.getBars();
 
             ctx.fillStyle = call.color;
@@ -22,30 +20,6 @@ async function draw(id){
         else if(call instanceof ScaleCall){
             drawer.scale(await call.scale());
         }
-    }
-}
-
-
-const data = {
-    load: async function(id){
-        let loaded = await fetch(`/json/${id}`);
-        let json = await loaded.json();
-    
-        if(json == null) console.error("FILE NOT FOUND 404");
-
-        return json;
-    },
-
-    get: async function(id){
-        if(!this[id]) data[id] = await this.load(id);
-        
-        return this[id];
-    },
-
-    getAttributes: async function(id){
-        let attr = [];
-        for(a in (await this.get(id))[0]) attr.push(a);
-        return attr;
     }
 }
 

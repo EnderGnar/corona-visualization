@@ -14,3 +14,10 @@ $('#addScale').click(
         generateCall("scale");
     }
 )
+
+
+$('#addProcess').click(
+    function(e){
+        generateCall("process");
+    }
+)

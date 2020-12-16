@@ -16,8 +16,28 @@ const modifiers = [
     {
         name: "sum-up",
         options:["on", "off"],
-    }
+    },
+
+    {
+        name: "time-scale",
+        options:["daily", "weekly"],
+    },
 ]
+
+function runModifier(mod, array){
+    switch(mod.name){
+        case "running-average":
+            return runningAverage(array, mod.option);
+        case "multiplier":
+            return multiplier(array, mod.option);
+        case "benford":
+            return benford(array);
+        case "sum-up":
+            return sumUp(array, mod.option);
+        case "time-scale":
+            return timeScale(array, mod.option);
+    }
+}
 
 //ONLY JSON STYLE OBJECTS!!! WITHOUT ARRAYS OR INNER OBJECTS
 function clone(obj){
@@ -81,11 +101,56 @@ function sumUp(arr, on){
 
     let out = [];
 
+    let sum = 0;
     for(let bar of arr){
+        sum += bar.entries;
+
         let n = clone(bar);
-        n.entries = n.sumTotal;
+        n.entries = sum;
 
         out.push(n);
+    }
+
+    return out;
+}
+
+function timeScale(arr, time){
+    let out = [];
+
+    const dayTime = 24*3600*1000;
+    const weekTime = 7*dayTime;
+    const week9 = new Date("2020-02-24");
+
+    const version = new Date(arr[0].version.substr(0, 10));
+
+    //ONLY 2020 accepted.
+    const weekN = (n) => (new Date(week9.getTime() + 7*24*3600*1000*(n-9)));
+
+    let weekweek = time == "weekly" && arr[0].datum_unit == "isoweek";
+    let dayday = time == "daily" && arr[0].datum_unit == "day";
+
+    if(weekweek || dayday) return arr;
+
+    if(time == "daily"){
+        //DATA IS IN ISOWEEKS
+
+        for(let week of arr){
+            let begin = weekN(week.datum%100);
+
+            let days = 7;
+
+            if(!(version.getTime() - begin.getTime() >= weekTime)) 
+                days = Math.floor((version.getTime()-begin.getTime())/dayTime);
+
+            for(let i = 0; i < days; i++){
+                let day = clone(week);
+                day.entries = week.entries/days;
+                day.datum = (new Date(begin.getTime() + i * dayTime).toISOString());
+                day.datum_unit = "day";
+
+                out.push(day);
+            }
+        }
     }
 
     return out;
