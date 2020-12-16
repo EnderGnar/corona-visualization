@@ -182,6 +182,10 @@ class DrawCall extends Call{
 
         return await this.dependency.getBars();
     }
+
+    toString = function(){
+        return JSON.stringify(this);
+    }
 }
 
 
@@ -193,7 +197,7 @@ class ScaleCall extends Call{
 
     constructor(id){
         super(id);
-        this.type = "draw";
+        this.type = "scale";
 
         this.renderDom();
     }
@@ -249,5 +253,9 @@ class ScaleCall extends Call{
         for(let {entries} of arr) if(entries > max) max = entries;
 
         return max;
+    }
+
+    toString = function(){
+        return JSON.stringify(this);
     }
 }

@@ -278,4 +278,8 @@ class ProcessCall extends Call{
 
         return array;
     }
+
+    toString = function(){
+        return JSON.stringify(this);
+    }
 }
