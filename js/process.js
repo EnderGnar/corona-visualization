@@ -376,9 +376,10 @@ class AddCall extends ProcessCall{
 
 
     loadDependency = function (){
-        for(let dep of this.dependencies){
+        for(let i = 0; i < this.dependencies.length; i++){
+            let dep = this.dependencies[i];
             if(typeof dep == 'number'){
-                dep = calls.find(e => e.id == dep);
+                this.dependencies[i] = calls.find(e => e.id == dep);
             }
         }
     }

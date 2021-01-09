@@ -135,7 +135,7 @@ class DrawCall extends Call{
 
         let call = this;
 
-        return $(`<select name="theme" value="death">
+        return $(`<select name="theme" value="">
                 ${(this.color == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
                 ${
                     colors.map(e => `<option value="${e}" ${(this.color == e)?"selected":""}>${e}</option>`).join(' ')
@@ -166,11 +166,11 @@ class DrawCall extends Call{
     dependencySelector = function(){
         let call = this;
 
-        return $(`<select name="theme">
+        return $(`<select name="theme" value = "">
                 ${(this.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
                 ${
                     calls.filter(e => (e instanceof ProcessCall))
-                    .map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e)?"selected":""}>${e.id}</option>`).join(' ')
+                    .map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
                 }
             </select>`)
             .change(function(e) {
@@ -249,7 +249,7 @@ class ScaleCall extends Call{
                 ${(this.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
                 ${
                     calls.filter(e => (e instanceof ProcessCall))
-                    .map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e)?"selected":""}>${e.id}</option>`).join(' ')
+                    .map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
                 }
             </select>`)
             .change(function(e) {
