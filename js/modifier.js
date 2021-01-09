@@ -123,8 +123,14 @@ function timeScale(arr, time){
 
     const version = new Date(arr[0].version.substr(0, 10));
 
-    //ONLY 2020 accepted.
-    const weekN = (n) => (new Date(week9.getTime() + 7*24*3600*1000*(n-9)));
+    //ONLY 2020/2021 accepted.
+    const weekN = (isoweek) => {
+        let n;
+        if(Math.floor(isoweek/100) == 2021) n = isoweek%100 + 53;
+        else n = isoweek%100;
+
+        return new Date(week9.getTime() + 7*24*3600*1000*(n-9));
+    };
 
     let weekweek = time == "weekly" && arr[0].datum_unit == "isoweek";
     let dayday = time == "daily" && arr[0].datum_unit == "day";
@@ -135,13 +141,13 @@ function timeScale(arr, time){
         //DATA IS IN ISOWEEKS
 
         for(let week of arr){
-            let begin = weekN(week.datum%100);
+            let begin = weekN(week.datum);
 
             let days = 7;
 
             if(!(version.getTime() - begin.getTime() >= weekTime)) 
-                days = Math.floor((version.getTime()-begin.getTime())/dayTime);
-
+                days = Math.floor((version.getTime()-begin.getTime())/dayTime)+1;
+            
             for(let i = 0; i < days; i++){
                 let day = clone(week);
                 day.entries = week.entries/days;
