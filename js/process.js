@@ -1,3 +1,28 @@
+let processes = [];
+
+async function generateProcess(type){
+    function generateId(){
+        let id;
+        do with(Math) id = "P"+floor(random()*9000000+1000000);
+        while(calls.filter(c => c.id == id).length > 0);
+
+        return id;
+    }
+
+    let process;
+    if(type == "import") process = new Import(generateId());
+    else if(type == "add") process = new AddProcess(generateId());
+
+    processes.push(process);
+
+    holder = document.getElementById("processholder");
+    
+    holder.appendChild(process.dom);
+
+    for(let call of calls) call.renderDom();
+}
+
+
 const data = {
     load: async function(id){
         let loaded = await fetch(`/json/${id}`);
@@ -39,9 +64,82 @@ const themes = [
 	"pcr-antigen",
 ];
 
+class Process{
+    id;
+    dom;
+    type;
 
 
-class ProcessCall extends Call{
+    constructor(id){
+        this.id=id;
+        this.generateDOM();
+    }
+
+    generateDOM(){
+        let div = document.createElement("div");
+
+        div.id = this.id;
+
+        this.dom = div;
+    }
+
+    rerender(){
+        this.renderDom();
+    }
+
+    renderDom(){
+        let header = $('<div></div>');
+
+        //Header
+        header.append(
+            $(`<b>${this.type}-process ${this.id}</b>`)
+        );
+
+        //delete
+        let delbutton = $(`<button>delete this ${this.type}-process</button>`)
+        .click((e) => {
+			let pos = processes.indexOf(this);
+            processes.splice(pos,1);
+
+            //remove dependency needed!
+            this.removeDependencies();
+
+            $("#"+this.id).remove();
+        });
+
+
+		header.append(
+            $('<div></div>')
+            .append(delbutton)
+        );
+
+
+        this.dom.replaceChildren(header[0]);
+    }
+
+    removeDependencies(){
+        let id = this.id;
+
+        //from calls:
+        for(let call of calls){
+            if(call.dependency == this){
+                call.dependency = undefined;
+                call.rerender();
+            } 
+        }
+
+        //from processes:
+        for(let process of processes){
+            if(process.dependencies){
+                process.dependencies.filter(e => e == this);
+
+                process.rerender();
+            }
+        }
+    }
+}
+
+class Import extends Process{
     currAttr;
     currModifier;
 
@@ -51,40 +149,16 @@ class ProcessCall extends Call{
 
     constructor(id){
         super(id);
-        this.type = "process";
+        this.type = "import";
 
         this.renderDom();
     }
 
-    renderDom = async function(){
+    async renderDom(){
+        super.renderDom();
         let div = document.createElement('div');
 
-        //Header
-        div.appendChild(
-            $(`<b>data processor ${this.id}</b>`)[0]
-        );
 
-        //delete
-		let delbutton = $('<button>delete this process call</button>')
-        .click((e) => {
-			let pos = calls.indexOf(this);
-            calls.splice(pos,1);
-
-            calls.forEach(call => {
-                if(call instanceof ScaleCall || call instanceof DrawCall){
-                    if(call.dependency == this) {
-                        call.dependency = null;
-                        call.rerender();
-                    }
-                }
-            })
-            $("#"+this.id).remove();
-        });
-
-
-		div.appendChild(
-        $('<div></div>')
-        .append(delbutton)[0]);
         
         //Theme
         div.appendChild(
@@ -130,14 +204,14 @@ class ProcessCall extends Call{
             this.renderModifier()
         );
 
-        this.dom.replaceChildren(div);
+        this.dom.append(div);
     }
 
     themeSelector = function(){
         //Selector for theme standard value = "none"
         //on change rerenders DOM with given information.
 
-        let call = this;
+        let process = this;
 
         return $(`<select name="theme" value="death">
                 ${(this.theme == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
@@ -146,8 +220,8 @@ class ProcessCall extends Call{
                 }
             </select>`)
             .change(function(e) {
-                call.theme = this.value; 
-                call.rerender();
+                process.theme = this.value; 
+                process.rerender();
             })[0];
     }
 
@@ -155,7 +229,7 @@ class ProcessCall extends Call{
         //selector of all attributes given by a theme.
         //#######has to have filters for what to show.#######
 
-        let call = this;
+        let process = this;
 
         return $(`<select name="newAttr" value="death">
                 ${(!attr.find(e => e == this.currAttr))? '<option value="" selected disabled hidden>not selected</option>':''}
@@ -163,7 +237,7 @@ class ProcessCall extends Call{
                     attr.map(e => `<option value="${e}" ${(this.currAttr == e)?"selected":""}>${e}</option>`).join(' ')
                 }
             </select>`)
-            .change(function(e) {call.currAttr = this.value; call.rerender()})[0];
+            .change(function(e) {process.currAttr = this.value; process.rerender()})[0];
     }
 
 
@@ -194,7 +268,7 @@ class ProcessCall extends Call{
 
     renderModifier = function(){
         let div = $('<div><span>Modifier: </span></div>');
-        let call = this;
+        let process = this;
 
         let select = $(`<select name="theme" value="death">
             ${(this.currModifier == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
@@ -203,7 +277,7 @@ class ProcessCall extends Call{
             }
         </select>`)
         .change(function(e) {
-            call.currModifier = this.value;
+            process.currModifier = this.value;
         });
 
 
@@ -287,7 +361,7 @@ class ProcessCall extends Call{
 }
 
 
-class AddCall extends ProcessCall{
+class AddProcess extends Process{
     dependencies = [];
 
     constructor(id){
@@ -298,33 +372,10 @@ class AddCall extends ProcessCall{
         this.renderDom();
     }
 
-    renderDom = function(){
+    renderDom(){
+        super.renderDom();
+
         let div = document.createElement('div');
-
-        //Header
-        div.appendChild(
-            $(`<b>data adder ${this.id}</b>`)[0]
-        );
-
-        //delete
-		let delbutton = $('<button>delete this add call</button>')
-        .click((e) => {
-			let pos = calls.indexOf(this);
-            calls.splice(pos,1);
-
-            calls.forEach(call => {
-                if(call instanceof ScaleCall || call instanceof DrawCall){
-                    if(call.dependency == this) {
-                        call.dependency = null;
-                        call.rerender();
-                    }
-                }
-                else if(call instanceof DrawCall){
-
-                }
-            })
-            $("#"+this.id).remove();
-        });
 
         for(let d of this.dependencies){
             div.appendChild($(`<div>adds: ${d.id}</div>`)[0]);
@@ -332,23 +383,23 @@ class AddCall extends ProcessCall{
 
         div.appendChild(this.dependencySelector());
 
-        this.dom.replaceChildren(div);
+        this.dom.appendChild(div);
     }
 
     dependencySelector = function(){
-        let call = this;
+        let process = this;
 
         return $(`<select name="theme">
                 '<option value="" selected hidden>add new</option>
                 ${
-                    calls.filter(e => (e instanceof ProcessCall && e != this))
+                    processes.filter(e=>e.id != process.id)
                     .map(e => `<option value="${e.id}">${e.id}</option>`).join(' ')
                 }
             </select>`)
             .change(function(e) {
                 if(this.value == "") return;
-                call.dependencies.push(calls.find(x => x.id == Number(this.value)));
-                call.rerender();
+                process.dependencies.push(processes.find(x => x.id == this.value));
+                process.rerender();
             })[0];
     }
 
@@ -378,8 +429,8 @@ class AddCall extends ProcessCall{
     loadDependency = function (){
         for(let i = 0; i < this.dependencies.length; i++){
             let dep = this.dependencies[i];
-            if(typeof dep == 'number'){
-                this.dependencies[i] = calls.find(e => e.id == dep);
+            if(typeof dep == 'string'){
+                this.dependencies[i] = processes.find(e => e.id == dep);
             }
         }
     }

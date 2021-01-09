@@ -2,7 +2,7 @@ window.onload = function(){
     let search = window.location.search;
     if(search == "") return;
 
-    callsFromJSON(decodeURI(search.substr(1)));
+    settingsFromJSON(decodeURI(search.substr(1)));
 };
 
 
@@ -24,15 +24,15 @@ $('#addScale').click(
 )
 
 
-$('#addProcess').click(
+$('#addImport').click(
     function(e){
-        generateCall("process");
+        generateProcess("import");
     }
 )
 
 $('#addADD').click(
     function(e){
-        generateCall("add");
+        generateProcess("add");
     }
 )
 
@@ -45,7 +45,7 @@ $('#import').click(
 
 $('#export').click(
     function(e){
-        let json = callsToJSON();
+        let json = settingsToJSON();
 
         window.history.pushState({}, 'Corona vis', window.location.origin + "/?" + encodeURI(json));
 
@@ -58,35 +58,50 @@ $('#jsonbutton').click(
     function(e){
         let input = $('#json').val();
 
-        callsFromJSON(input);
+        settingsFromJSON(input);
 
         $('#jsoninput').css('visibility','hidden');
         $('#jsonbutton').css('visibility','hidden');
     }
 )
 
-function callsToJSON(){
-    let arr = calls.map(call => call.toString());
+function settingsToJSON(){
+    let callArr = calls.map(call => call.toString());
+    let proArr = processes.map(process => process.toString());
 
-    return `[${arr.join(',')}]`;
+    return `{"calls":[${callArr.join(',')}],
+    "processes":[${proArr.join(',')}]}`;
 }
 
-function callsFromJSON(string){
-    let arr = JSON.parse(string);
+function settingsFromJSON(string){
+    let settings = JSON.parse(string);
 
-    for(let obj of arr){
+    for(let obj of settings.calls){
         calls.push(callFrom(obj));
     }
+    for(let obj of settings.processes){
+        processes.push(processFrom(obj));
+    }
 
-    holder = document.getElementById("callholder");
+    let callholder = document.getElementById("callholder");
     
-    holder.innerHTML = "";
+    callholder.innerHTML = "";
 
     for(let call of calls) {
         call.loadDependency();
 
-        holder.appendChild(call.dom);
+        callholder.appendChild(call.dom);
         call.renderDom();
+    }
+
+    let proholder = document.getElementById("processholder");
+    proholder.innerHTML = "";
+
+    for(let process of processes){
+        process.loadDependency();
+
+        proholder.appendChild(process.dom);
+        process.renderDom();
     }
 }
 
@@ -110,21 +125,26 @@ function callFrom(obj){
             call.dependency = obj.dependency;
 
             return call;
-        
-        case "process":
-            call = new ProcessCall(obj.id);
+    }
+}
 
-            call.theme = obj.theme;
-            call.currAttr = obj.currAttr;
-            call.filter = obj.filter;
-            call.modifier = obj.modifier;
+function processFrom(obj){
+    let pro;
+    switch(obj.type){
+        case "import":
+            pro = new Import(obj.id);
 
-            return call;
+            pro.theme = obj.theme;
+            pro.currAttr = obj.currAttr;
+            pro.filter = obj.filter;
+            pro.modifier = obj.modifier;
+
+            return pro;
 
         case "add":
-            call = new AddCall(obj.id);
+            pro = new AddProcess(obj.id);
 
-            call.dependencies = obj.dependencies;
-            return call;
+            pro.dependencies = obj.dependencies;
+            return pro;
     }
 }

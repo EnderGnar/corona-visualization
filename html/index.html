@@ -9,8 +9,7 @@
         <canvas style = "border: solid black thin" id = "corona-stats" width="800" height="400">
         </canvas>
 
-        <div id="calls">
-            <h1>Calls</h1>
+        <div id="userinterface">
             <button id="import">IMPORT</button>
             <button id="export">EXPORT</button>
 
@@ -19,20 +18,32 @@
                 <button id="jsonbutton" style="visibility: hidden;">import</button>
             </div> 
 
-            <button id="addDraw">Add Draw Call</button>
-            <button id="addScale">Add Scale Call</button>
-            <button id="addProcess">Add Process Data Call</button>
-            <button id="addADD">Add Add Data Call</button>
-            <div id="callholder"></div>
+            <div id = "holder">
+                <div id = "calls">
+                    <h3>Calls:</h3>
+                    <button id="addDraw">Add Draw Call</button>
+                    <button id="addScale">Add Scale Call</button>
+
+                    <div id="callholder"></div>
+                </div>
+                <div id ="processes">
+                    <h3>Processes:</h3>
+                    <button id="addImport">Add Import</button>
+                    <button id="addADD">Add Adder</button>
+
+                    <div id ="processholder"></div>
+                </div>
+            </div>
+            
             <button id="drawByCalls">DRAW!</button>
-
-            <script src = "modifier.js"></script>
-            <script src = "draw.js"></script>
-            <script src = "call.js"></script>
-
-            <script src = "process.js"></script>
-
-            <script src = "main.js"></script>
         </div>
+
+        <script src = "modifier.js"></script>
+        <script src = "draw.js"></script>
+        <script src = "call.js"></script>
+
+        <script src = "process.js"></script>
+
+        <script src = "main.js"></script>
     </body>
 </html>

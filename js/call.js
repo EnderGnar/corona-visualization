@@ -3,7 +3,7 @@ let calls = [];
 async function generateCall(type){
     function generateId(){
         let id;
-        do with(Math) id = floor(random()*9000000+1000000);
+        do with(Math) id = "C"+floor(random()*9000000+1000000);
         while(calls.filter(c => c.id == id).length > 0);
 
         return id;
@@ -12,8 +12,6 @@ async function generateCall(type){
     let call;
     if(type == "draw") call = new DrawCall(generateId());
     else if(type == "scale") call = new ScaleCall(generateId());
-    else if(type == "process") call = new ProcessCall(generateId());
-    else if(type == "add") call = new AddCall(generateId());
 
     calls.push(call);
 
@@ -21,8 +19,6 @@ async function generateCall(type){
     holder = document.getElementById("callholder");
     
     holder.appendChild(call.dom);
-
-    for(let call of calls) if(call instanceof ScaleCall) call.renderDom();
 }
 
 
@@ -169,12 +165,11 @@ class DrawCall extends Call{
         return $(`<select name="theme" value = "">
                 ${(this.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
                 ${
-                    calls.filter(e => (e instanceof ProcessCall))
-                    .map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
+                    processes.map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
                 }
             </select>`)
             .change(function(e) {
-                call.dependency = calls.find(x => x.id == Number(this.value));
+                call.dependency = processes.find(x => x.id == this.value);
             })[0];
     }
 
@@ -195,8 +190,8 @@ class DrawCall extends Call{
     }
 
     loadDependency = function (){
-        if(typeof this.dependency == 'number'){
-            this.dependency = calls.find(e => e.id == this.dependency);
+        if(typeof this.dependency == 'string'){
+            this.dependency = processes.find(e => e.id == this.dependency);
         }
     }
 }
@@ -248,12 +243,11 @@ class ScaleCall extends Call{
         return $(`<select name="theme">
                 ${(this.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
                 ${
-                    calls.filter(e => (e instanceof ProcessCall))
-                    .map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
+                    processes.map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
                 }
             </select>`)
             .change(function(e) {
-                call.dependency = calls.find(x => x.id == Number(this.value));
+                call.dependency = processes.find(x => x.id == this.value);
             })[0];
     }
 
@@ -277,8 +271,8 @@ class ScaleCall extends Call{
     }
 
     loadDependency = function (){
-        if(typeof this.dependency == 'number'){
-            this.dependency = calls.find(e => e.id == this.dependency);
+        if(typeof this.dependency == 'string'){
+            this.dependency = processes.find(e => e.id == this.dependency);
         }
     }
 }
