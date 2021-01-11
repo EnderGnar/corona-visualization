@@ -4,14 +4,18 @@
         <title>Corona vis.</title>
 
         <script src = "jquery.js"></script>
+        
+        <link rel = "stylesheet" href = "main.css">
     </head>
     <body>
-        <canvas style = "border: solid black thin" id = "corona-stats" width="800" height="400">
-        </canvas>
-
+        <div id = "canvasholder">
+            <canvas style = "border: solid black thin" id = "corona-stats" width="800" height="400">
+            </canvas>
+        </div>
         <div id="userinterface">
             <button id="import">IMPORT</button>
             <button id="export">EXPORT</button>
+            <button id="drawByCalls">DRAW!</button>
 
             <div id="jsoninput" style="visibility: hidden;">
                 <input type = "text" id = "json"/>
@@ -19,24 +23,24 @@
             </div> 
 
             <div id = "holder">
-                <div id = "calls">
+                <div id = "calls" class="settings">
                     <h3>Calls:</h3>
                     <button id="addDraw">Add Draw Call</button>
                     <button id="addScale">Add Scale Call</button>
 
-                    <div id="callholder"></div>
+                    <div id="callholder" class="holder"></div>
                 </div>
-                <div id ="processes">
+                <div id ="processes" class="settings">
                     <h3>Processes:</h3>
                     <button id="addImport">Add Import</button>
                     <button id="addADD">Add Adder</button>
 
-                    <div id ="processholder"></div>
+                    <div id ="processholder" class="holder"></div>
                 </div>
             </div>
             
-            <button id="drawByCalls">DRAW!</button>
         </div>
+        <script src = "helper.js"></script>
 
         <script src = "modifier.js"></script>
         <script src = "draw.js"></script>

@@ -20,6 +20,7 @@ async function generateProcess(type){
     holder.appendChild(process.dom);
 
     for(let call of calls) call.renderDom();
+    for(let process of processes) if(process.dependencies) process.renderDom();
 }
 
 
@@ -79,6 +80,7 @@ class Process{
         let div = document.createElement("div");
 
         div.id = this.id;
+        div.className = "process";
 
         this.dom = div;
     }
@@ -163,7 +165,10 @@ class Import extends Process{
         //Theme
         div.appendChild(
             $('<div><span>Theme: </span></div>')
-            .append(this.themeSelector())[0]
+            .append(
+                //theme selector
+                helper.selector(this, themes, "theme")
+            )[0]
         );
 
         if(this.theme != undefined){
@@ -183,7 +188,10 @@ class Import extends Process{
 
             //Headline for Filter controll.
             attributes.children().first()
-            .append(this.attributeSelector(attr))
+            .append(
+                //attribute selector
+                helper.selector(this, attr, "currAttr")
+            )
             .append(attraddbutton);
 
             //Removes all filters nomore in use.
@@ -207,40 +215,6 @@ class Import extends Process{
         this.dom.append(div);
     }
 
-    themeSelector = function(){
-        //Selector for theme standard value = "none"
-        //on change rerenders DOM with given information.
-
-        let process = this;
-
-        return $(`<select name="theme" value="death">
-                ${(this.theme == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    themes.map(e => `<option value="${e}" ${(this.theme == e)?"selected":""}>${e}</option>`).join(' ')
-                }
-            </select>`)
-            .change(function(e) {
-                process.theme = this.value; 
-                process.rerender();
-            })[0];
-    }
-
-    attributeSelector = function(attr){
-        //selector of all attributes given by a theme.
-        //#######has to have filters for what to show.#######
-
-        let process = this;
-
-        return $(`<select name="newAttr" value="death">
-                ${(!attr.find(e => e == this.currAttr))? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    attr.map(e => `<option value="${e}" ${(this.currAttr == e)?"selected":""}>${e}</option>`).join(' ')
-                }
-            </select>`)
-            .change(function(e) {process.currAttr = this.value; process.rerender()})[0];
-    }
-
-
     renderFilter = async function(filter){
         //filter
         let div = $('<div></div>');
@@ -250,14 +224,8 @@ class Import extends Process{
 
         let values = (await data.get(this.theme)).map(e => e[filter.attribute]).filter((e,i,a) => a.indexOf(e) == i).sort();
 
-        //Similar to all other selections.
-        let selection = $(`<select name="option">
-            ${(!values.find(e => e == this.filter.value))? '<option value="" selected disabled hidden>not selected</option>':''}
-            ${
-                values.map(e => `<option value="${e}" ${(filter.value == e)?"selected":""}>${e}</option>`).join(' ')
-            }
-        </select>`)
-        .change(function(e) {this.filter.value = this.value;})[0];
+        //selection over all values.
+        let selection = helper.selector(filter, values, "value");
 
         selection.filter = filter;
 
@@ -270,15 +238,7 @@ class Import extends Process{
         let div = $('<div><span>Modifier: </span></div>');
         let process = this;
 
-        let select = $(`<select name="theme" value="death">
-            ${(this.currModifier == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
-            ${
-                modifiers.map(e => `<option value="${e.name}" ${(this.currModifier == e.name)?"selected":""}>${e.name}</option>`).join(' ')
-            }
-        </select>`)
-        .change(function(e) {
-            process.currModifier = this.value;
-        });
+        let select = helper.selector(this, modifiers.map(m => m.name), "currModifier");
 
 
         let addbutton = $('<button>add</button>')
@@ -295,13 +255,7 @@ class Import extends Process{
         for(let mod of this.modifier){
             let parent = modifiers.find(e => e.name == mod.name);
             let modDom = $(`<div><span>${mod.name}: </span></div>`)
-            let modSelect = $(`<select name="modifier">
-                ${(!parent.options.find(e => e == mod.option))? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    parent.options.map(e => `<option value="${e}" ${(mod.option == e)?"selected":""}>${e}</option>`).join(' ')
-                }
-            </select>`)
-            .change(function(e) {mod.option = this.value; call.rerender()})[0];
+            let modSelect = helper.selector(mod, parent.options, "option");
 
             modDom.append(modSelect);
             holder.append(modDom);
@@ -378,10 +332,25 @@ class AddProcess extends Process{
         let div = document.createElement('div');
 
         for(let d of this.dependencies){
-            div.appendChild($(`<div>adds: ${d.id}</div>`)[0]);
+            div.appendChild($(`<div class = "adding" aid = "${d.id}">adds: ${d.id}</div>`)[0]);
         }
 
-        div.appendChild(this.dependencySelector());
+        div.appendChild(
+            this.dependencySelector()
+        );
+
+        $(div).find(".adding").hover(
+            function(e){
+                $(`#${this.getAttribute("aid")}`).css(
+                    "background-color","#ffcccc"
+                )
+            },
+            function(e){
+                $(`#${this.getAttribute("aid")}`).css(
+                    "background-color",""
+                )
+            }
+        );
 
         this.dom.appendChild(div);
     }

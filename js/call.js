@@ -38,6 +38,7 @@ class Call{
         let div = document.createElement("div");
 
         div.id = this.id;
+        div.className = "call";
 
         this.dom = div;
     }
@@ -46,8 +47,35 @@ class Call{
         this.renderDom();
     }
 
-    renderDom = function(){
-        this.dom.innerText=this.id;
+    renderDom(){
+        let header = $('<div></div>');
+        header.append(
+            $(`<b>${this.type}-call ${this.id}</b>`)
+        );
+		
+		//delete
+		let delbutton = $(`<button>delete this ${this.type}-call</button>`)
+        .click((e) => {
+			let pos = calls.indexOf(this);
+            calls.splice(pos,1);
+
+			$("#"+this.id).remove();
+        });
+		
+		header.append(
+            $('<div></div>')
+            .append(delbutton)
+        );
+
+        this.dom.replaceChildren(header[0]);
+    }
+
+
+
+    loadDependency(){
+        if(typeof this.dependency == 'string'){
+            this.dependency = processes.find(e => e.id == this.dependency);
+        }
     }
 }
 
@@ -82,95 +110,36 @@ class DrawCall extends Call{
         this.renderDom();
     }
 
-    renderDom =  async function (){
+    async renderDom(){
+        super.renderDom();
         let div = document.createElement('div');
-
-        div.appendChild(
-            $(`<b>draw call ${this.id}</b>`)[0]
-        );
-		
-		//delete
-		let delbutton = $('<button>delete this drawcall</button>')
-        .click((e) => {
-			let pos = calls.indexOf(this);
-            calls.splice(pos,1);
-
-			$("#"+this.id).remove();
-        });
-		
-		div.appendChild(
-		$('<div></div>')
-		.append(delbutton)[0]);
-		
-		
-        //dependency
 
         //Color Select
         div.appendChild(
             $('<div><span>Color: </span></div>')
-            .append(this.colorSelector())[0]
+            .append(
+                helper.selector(this, colors, "color")
+            )[0]
         )
 
         //Style Select
         div.appendChild(
             $('<div><span>Style: </span></div>')
-            .append(this.styleSelector())[0]
+            .append(
+                helper.selector(this, styles, "style")
+            )[0]
         );
 
+        //dependency
         div.appendChild(
-            this.dependencySelector()
+            helper.dependencySelector(this,
+                (value) => {
+                    this.dependency = processes.find(p => p.id == value);
+                }
+            )
         );
 
-        this.dom.replaceChildren(div);
-    }
-
-
-    colorSelector = function(){
-        //Selector for theme standard value = "none"
-        //on change rerenders DOM with given information.
-
-        let call = this;
-
-        return $(`<select name="theme" value="">
-                ${(this.color == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    colors.map(e => `<option value="${e}" ${(this.color == e)?"selected":""}>${e}</option>`).join(' ')
-                }
-            </select>`)
-            .change(function(e) {
-                call.color = this.value;
-            })[0];
-    }
-
-    styleSelector = function(){
-        //Selector for theme standard value = "none"
-        //on change rerenders DOM with given information.
-
-        let call = this;
-
-        return $(`<select name="theme" value="death">
-                ${(this.style == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    styles.map(e => `<option value="${e}" ${(this.style == e)?"selected":""}>${e}</option>`).join(' ')
-                }
-            </select>`)
-            .change(function(e) {
-                call.style = this.value;
-            })[0];
-    }
-
-    dependencySelector = function(){
-        let call = this;
-
-        return $(`<select name="theme" value = "">
-                ${(this.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    processes.map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
-                }
-            </select>`)
-            .change(function(e) {
-                call.dependency = processes.find(x => x.id == this.value);
-            })[0];
+        this.dom.appendChild(div);
     }
 
     getBars = async function(){
@@ -188,12 +157,6 @@ class DrawCall extends Call{
             dependency: (this.dependency)?this.dependency.id:undefined,
         });
     }
-
-    loadDependency = function (){
-        if(typeof this.dependency == 'string'){
-            this.dependency = processes.find(e => e.id == this.dependency);
-        }
-    }
 }
 
 
@@ -210,47 +173,21 @@ class ScaleCall extends Call{
         this.renderDom();
     }
 
-    renderDom =  async function (){
+    async renderDom(){
+        super.renderDom();
         let div = document.createElement('div');
 
         div.appendChild(
-            $('<b>scale call</b>')[0]
-        );
-		
-		//delete
-		let delbutton = $('<button>delete this scalecall</button>')
-        .click((e) => {
-			let pos = calls.indexOf(this);
-            calls.splice(pos,1);
-			$("#"+this.id).remove();
-        });
-
-
-        div.appendChild(
-            this.dependencySelector()
-        );
-		
-		div.appendChild(
-		$('<div></div>')
-		.append(delbutton)[0]);
-
-        this.dom.replaceChildren(div);
-    }
-
-    dependencySelector = function(){
-        let call = this;
-
-        return $(`<select name="theme">
-                ${(this.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
-                ${
-                    processes.map(e => `<option value="${e.id}" ${(this.dependency && this.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
+            helper.dependencySelector(this,
+                (value) => {
+                    this.dependency = processes.find(p => p.id == value);
                 }
-            </select>`)
-            .change(function(e) {
-                call.dependency = processes.find(x => x.id == this.value);
-            })[0];
-    }
+            )
+        );
 
+        this.dom.appendChild(div);
+    }
+    
     scale = async function(){
         if(this.dependency == undefined) throw "NEEDS DEPENDENCY";
 
@@ -268,11 +205,5 @@ class ScaleCall extends Call{
             type:this.type,
             dependency: (this.dependency)?this.dependency.id:undefined,
         });
-    }
-
-    loadDependency = function (){
-        if(typeof this.dependency == 'string'){
-            this.dependency = processes.find(e => e.id == this.dependency);
-        }
     }
 }

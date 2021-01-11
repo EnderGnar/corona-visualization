@@ -10,6 +10,7 @@ const port = 8080;
 
 app.use(express.static('html'));
 app.use(express.static('js'));
+app.use(express.static('css'));
 
 app.get('/', (req, res) => {
     res.send("no");
