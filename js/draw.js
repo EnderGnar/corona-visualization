@@ -7,6 +7,9 @@ const height = 400;
 async function draw(){
     ctx.clearRect(0,0,width,height);
 
+    //clear metadata
+    metaData = [];
+
     for(let call of calls){
         if(call instanceof DrawCall){
             let array = await call.getBars();
@@ -15,6 +18,7 @@ async function draw(){
             ctx.strokeStyle = call.color;
 
             drawer.draw(array, call.style);
+            addToMetaData(array, call);
         }
 
         else if(call instanceof ScaleCall){
@@ -29,14 +33,14 @@ const drawer = {
     scaling:1,
 
     draw: async function(bars, style){
-        const space = (width* 0.9) / bars.length;
+        const space = (width) / bars.length;
     
         if(style == "Balken"){
             for(let i = 0; i < bars.length; i++){
                 const bar = bars[i];
                 
                 ctx.beginPath();
-                ctx.rect(0.1*width + i*space, height, space, -this.scaling*bar.entries);
+                ctx.rect(i*space, height, space, -this.scaling*bar.entries);
                 ctx.fill();
             }
         }
@@ -45,7 +49,7 @@ const drawer = {
                 const bar = bars[i];
                 
                 ctx.beginPath();
-                ctx.arc(0.1*width + (i+0.5)*space, height - this.scaling*bar.entries, Math.max(space*0.2,4), 0, Math.PI*2);
+                ctx.arc((i+0.5)*space, height - this.scaling*bar.entries, Math.max(space*0.2,4), 0, Math.PI*2);
                 ctx.fill();
             }
         }
@@ -57,7 +61,7 @@ const drawer = {
             for(let i = 1; i < bars.length; i++){
                 const bar = bars[i];
                 
-                ctx.lineTo(0.1*width + (i+0.5)*space, height - this.scaling*bar.entries);
+                ctx.lineTo((i+0.5)*space, height - this.scaling*bar.entries);
             }
 
             ctx.stroke();

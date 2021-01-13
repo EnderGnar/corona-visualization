@@ -8,9 +8,14 @@
         <link rel = "stylesheet" href = "main.css">
     </head>
     <body>
-        <div id = "canvasholder">
-            <canvas style = "border: solid black thin" id = "corona-stats" width="800" height="400">
-            </canvas>
+        <div id = "background">
+            <div id = "canvasholder">
+                <canvas style = "border: solid black thin" id = "corona-stats" width="800" height="400">
+                </canvas>
+                <div id = "info">
+                    INFO!
+                </div>
+            </div>
         </div>
         <div id="userinterface">
             <button id="import">IMPORT</button>
@@ -44,9 +49,11 @@
 
         <script src = "modifier.js"></script>
         <script src = "draw.js"></script>
-        <script src = "call.js"></script>
 
+        <script src = "call.js"></script>
         <script src = "process.js"></script>
+
+        <script src = "meta.js"></script>
 
         <script src = "main.js"></script>
     </body>

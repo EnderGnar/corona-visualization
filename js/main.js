@@ -148,3 +148,10 @@ function processFrom(obj){
             return pro;
     }
 }
+
+
+
+//Placeholder infront of canvas
+$('#userinterface').css(
+    "margin-top", `${$('#background').innerHeight()}px`
+);

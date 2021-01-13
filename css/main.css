@@ -1,16 +1,46 @@
+body{
+    margin:0px;
+}
+
+#background{
+    padding:10px;
+    width: 100%;
+    z-index: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
 #canvasholder{
+    width: fit-content;
     margin-left: auto;
     margin-right: auto;
-    width: fit-content;
-    z-index: -1;
+    position: relative;
 }
+
+#corona-stats{
+    background-color: white;
+}
+
+#info{
+    visibility: hidden;
+    position: absolute;
+    padding: 5px;
+    background-color: white;
+    border: solid black thin;
+    top:0;
+    left:0;
+}
+
+
 
 #holder{
     width: 100%;
+    display: inline-flex;
 }
 
 .settings{
-    float: left;
     width: 50%;
     min-width: 300px;
 }
@@ -19,7 +49,7 @@
     float: left;
     margin:5px;
     padding: 5px;
-    background-color: #f6f6f6;
+    background-color: #e0e0e0;
     width: fit-content;
     display: inline-grid;
 }
@@ -31,7 +61,7 @@
 .call{
     margin:5px;
     padding: 5px;
-    background-color: #f6f6f6;
+    background-color: #e0e0e0;
     width: fit-content;
     display: inline-grid;
 }
@@ -42,4 +72,10 @@
 
 .holder{
     margin:10px;
+}
+
+#userinterface{
+    background-color: #f6f6f6;
+    padding: 10px;
+    min-height: 400px;
 }
