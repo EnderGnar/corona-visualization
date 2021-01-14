@@ -12,6 +12,8 @@ async function generateProcess(type){
     let process;
     if(type == "import") process = new Import(generateId());
     else if(type == "add") process = new AddProcess(generateId());
+    else if(type == "sum") process = new SumUp(generateId());
+    else if(type == "div") process = new Divider(generateId());
 
     processes.push(process);
 
@@ -20,12 +22,13 @@ async function generateProcess(type){
     holder.appendChild(process.dom);
 
     for(let call of calls) call.renderDom();
-    for(let process of processes) if(process.dependencies) process.renderDom();
+    for(let process of processes) if(process.dependencies || process instanceof SumUp) process.renderDom();
 }
 
 
 const data = {
     load: async function(id){
+        if(id == undefined) return undefined;
         let loaded = await fetch(`/json/${id}`);
         let json = await loaded.json();
     
@@ -402,5 +405,169 @@ class AddProcess extends Process{
                 this.dependencies[i] = processes.find(e => e.id == dep);
             }
         }
+    }
+}
+
+
+class SumUp extends Process{
+    dependency;
+    attribute;
+
+    constructor(id){
+        super(id);
+
+        this.type = "sum";
+
+        this.renderDom();
+    }
+
+    async renderDom(){
+        super.renderDom();
+
+        let div = $('<div></div>');
+
+        div.append(
+            helper.dependencySelector(this,
+                (value) => {
+                    this.dependency = processes.find(p => p.id == value);
+                    this.rerender();
+                }
+            )
+        );
+
+        if(this.dependency){
+            let bars = await this.dependency.getBars();
+            if(bars != undefined && bars.length > 0){
+                let bar = bars[0];
+
+                let attr = [];
+                for(let a in bar) attr.push(a);
+    
+                let sel = $('<div>by: </div>')
+                
+                
+                sel.append(helper.selector(this, attr, "attribute"))
+
+                let reload = $('<button>RE</button>').click(() => this.rerender());
+
+                sel.append(reload);
+    
+                div.append(sel);
+            }
+        }
+
+        this.dom.appendChild(div[0]);
+    }
+
+    toString(){
+        return JSON.stringify({
+            id:this.id,
+            type:this.type,
+            dependency: (this.dependency==undefined)?undefined:this.dependency.id,
+            attribute: this.attribute
+        });
+    }
+
+
+    loadDependency(){
+        if(this.dependency && typeof this.dependency == "string") this.dependency = processes.find(e => e.id == this.dependency);
+    }
+
+
+    async getBars(){
+        if(this.dependency == undefined) throw "NEEDS DEPENDENCY";
+
+        let bars = await this.dependency.getBars();
+
+        if(bars == undefined || bars.length == 0) return [];
+
+        let attributes = {};
+
+        let a = this.attribute;
+
+        bars.forEach(bar => {
+            if(attributes[bar[a]] == undefined) attributes[bar[a]] = clone(bar);
+            else attributes[bar[a]].entries += bar.entries;
+        });
+
+        let out = [];
+        for(let attr in attributes) out.push(attributes[attr]);
+        return out;
+    }
+}
+
+
+class Divider extends Process{
+    dependencies = {};
+    attribute;
+
+    constructor(id){
+        super(id);
+
+        this.type = "div";
+
+        this.renderDom();
+    }
+
+    async renderDom(){
+        super.renderDom();
+
+        let div = $('<div></div>');
+
+        div.append('divident: ');
+        div.append(
+            helper.dependencySelector(this.dependencies,
+                (value) => {
+                    this.dependencies.divident = processes.find(p => p.id == value);
+                }
+                , "divident")
+        );
+
+        div.append('divisor: ');
+        div.append(
+            helper.dependencySelector(this.dependencies,
+                (value) => {
+                    this.dependencies.divisor = processes.find(p => p.id == value);
+                }
+                , "divisor")
+        )
+
+        this.dom.appendChild(div[0]);
+    }
+
+    toString(){
+        return JSON.stringify({
+            id:this.id,
+            type:this.type,
+            divisor: this.dependencies.divisor.id,
+            divident: this.dependencies.divident.id,
+        });
+    }
+
+
+    loadDependency(){
+        if(this.dependencies) {
+            if(typeof this.dependencies.divident == "string") this.dependencies.divident = processes.find(e => e.id == this.dependencies.divident);
+            if(typeof this.dependencies.divisor == "string") this.dependencies.divisor = processes.find(e => e.id == this.dependencies.divisor);
+        }
+    }
+
+
+    getBars = async function(){
+        if(this.dependencies.divident == undefined || this.dependencies.divisor == undefined) throw "NEEDS DEPENDENCY";
+
+        console.log(this.dependencies.divident.getBars)
+
+        let divident = await this.dependencies.divident.getBars();
+
+        let divisor = await this.dependencies.divisor.getBars();
+
+        let out = [];
+        for(let i = 0; i < divident.length; i++){
+             out.push(clone(divident[i]));
+             out[i].entries /= divisor[i].entries;
+        }
+
+        return out;
     }
 }

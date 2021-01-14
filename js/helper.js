@@ -12,12 +12,12 @@ const helper = {
             })[0];
     },
 
-    dependencySelector: function(caller, action = (value) => value){
+    dependencySelector: function(caller, action = (value) => value, depLocation = "dependency"){
         let sel = $(`<select name="dependency">
-            ${(caller.dependency == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
+            ${(caller[depLocation] == undefined)? '<option value="" selected disabled hidden>not selected</option>':''}
             ${
                 processes.filter(p => p.id != caller.id)
-                    .map(e => `<option value="${e.id}" ${(caller.dependency && caller.dependency.id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
+                    .map(e => `<option value="${e.id}" ${(caller[depLocation] && caller[depLocation].id == e.id)?"selected":""}>${e.id}</option>`).join(' ')
             }
         </select>`)
         .change(function(e) {
@@ -34,6 +34,7 @@ const helper = {
         sel.hover(
             //in
             function(e){
+                if(this.value == "") return;
                 $(`.process`).css(
                     "background-color",""
                 )

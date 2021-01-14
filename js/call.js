@@ -196,6 +196,7 @@ class ScaleCall extends Call{
 
         for(let {entries} of arr) if(entries > max) max = entries;
 
+        console.log(max);
         return max;
     }
 

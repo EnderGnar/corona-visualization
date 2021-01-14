@@ -30,9 +30,21 @@ $('#addImport').click(
     }
 )
 
+$('#addSum').click(
+    function(e){
+        generateProcess("sum");
+    }
+)
+
 $('#addADD').click(
     function(e){
         generateProcess("add");
+    }
+)
+
+$('#addDiv').click(
+    function(e){
+        generateProcess("div");
     }
 )
 
@@ -145,6 +157,20 @@ function processFrom(obj){
             pro = new AddProcess(obj.id);
 
             pro.dependencies = obj.dependencies;
+            return pro;
+
+        case "sum":
+            pro = new SumUp(obj.id);
+
+            pro.dependency = obj.dependency;
+            pro.attribute = obj.attribute;
+            return pro;
+
+        case "div":
+            pro = new Divider(obj.id);
+
+            pro.dependencies.divident = obj.divident;
+            pro.dependencies.divisor = obj.divisor;
             return pro;
     }
 }
