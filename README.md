@@ -3,25 +3,26 @@ A HTML project to visualize switzerlands corona data.
 
 This is just a personal project.
 
-# usage
+## usage
 node main.js
 
-#features
+## features
 on the website you find a canvas which will be used to draw the visualizations.
 
-to get something on the screen you first have to add a Process:
--> Add Import 
--> Theme: cases 
--> Filter: geoRegion 
--> add 
--> geoRegion: CHFL
 
-then we have to scale the canvas accordingly:
--> Add scale call
--> add process id of our process to the scale call
+### create an import process:
+- Add Import Process 
+- Theme: cases 
+- Filter: geoRegion 
+- add 
+- geoRegion: CHFL
 
-finally we have to add the data to be drawn:
--> Add draw call
--> add process id of our process
+### scale the drawing:
+- Add scale call
+- add process id of our process to the scale call
 
-press DRAW!
+### draw the data:
+- Add draw call
+- add process id of our process
+
+### press DRAW!
